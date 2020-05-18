@@ -1,0 +1,22 @@
+#controls {
+  display: none;
+}
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.svg-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#svg {
+  width: 850px;
+  height: 850px;
+}
