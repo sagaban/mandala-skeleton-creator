@@ -77,7 +77,6 @@ Vue.component("mandala-generator", {
   mounted() {
     this.paper = Snap("#svg");
     const {width, height} = this.$refs.svg.getBoundingClientRect()
-    const center = Math.min(width, height);
     this.center = {
       x: width /2,
       y: height /2
@@ -113,16 +112,12 @@ Vue.component("mandala-generator", {
       this.linesGroup.clear();
       const { x, y } = this.center;
       const n = amount * 2;
-      let tempPoints = [];
-      for (let i = 0; i < n; i++) {
-        const apexX = x + this.radio * Math.cos((2 * Math.PI * i) / n);
-        const apexY = y + this.radio * Math.sin((2 * Math.PI * i) / n);
-        if (i < amount) {
-          tempPoints.push({ apexX, apexY });
-        } else {
-          const tp = tempPoints[i % amount];
-          this.linesGroup.line(tp.apexX, tp.apexY, apexX, apexY);
-        }
+      for (let i = 0; i < amount; i++) {
+        const startX = x + this.radio * Math.cos((2 * Math.PI * i) / n);
+        const startY = y + this.radio * Math.sin((2 * Math.PI * i) / n);
+        const endX = x + this.radio * Math.cos((2 * Math.PI * (i + amount)) / n);
+        const endY = y + this.radio * Math.sin((2 * Math.PI * (i + amount)) / n);
+        this.linesGroup.line(startX, startY, endX, endY);
       }
     },
     drawCircles(value) {
@@ -180,7 +175,7 @@ Vue.component("mandala-generator", {
       @colorInput="colorHandler"
     />
     <div class="svg-container">
-      <svg id="svg" ref="svg" :style=""/>,
+      <svg id="svg" ref="svg" :style=""/>
     </div>
   </div>`
 });
