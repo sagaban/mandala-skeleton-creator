@@ -1,5 +1,12 @@
 Vue.component("controls", {
-  props: ["circles", "lines", "strokeWidth", "strokeDasharray", "color"],
+  props: [
+    "circles",
+    "lines",
+    "progressive",
+    "strokeWidth",
+    "strokeDasharray",
+    "color",
+  ],
   data() {
     return {
       colorOptions: [
@@ -36,6 +43,10 @@ Vue.component("controls", {
       <input type="number" name="circles" id="circles" min=1 :value="circles" @input="$emit('circlesInput', +$event.target.value)"/>
     </div>
     <div class="controls__input-group">
+      <label htmlFor="progressive">Progressive distance</label>
+      <input type="checkbox" name="progressive" id="progressive" :checked="progressive" @input="$emit('progressiveHandler', +$event.target.value)"/>
+    </div>
+    <div class="controls__input-group">
       <label htmlFor="lines"># of lines</label>
       <input type="number" name="lines" id="lines" min=2 :value="lines" @input="$emit('linesInput', +$event.target.value)"/>
     </div>
@@ -66,6 +77,7 @@ Vue.component("mandala-generator", {
       },
       paper: null,
       circles: 4,
+      progressive: true,
       circlesGroup: null,
       lines: 4,
       linesGroup: null,
@@ -76,11 +88,11 @@ Vue.component("mandala-generator", {
   },
   mounted() {
     this.paper = Snap("#svg");
-    const {width, height} = this.$refs.svg.getBoundingClientRect()
+    const { width, height } = this.$refs.svg.getBoundingClientRect();
     this.center = {
-      x: width /2,
-      y: height /2
-    }
+      x: width / 2,
+      y: height / 2,
+    };
     this.circlesGroup = this.paper.group().attr({
       strokeWidth: this.strokeWidth,
       stroke: this.color,
@@ -115,18 +127,28 @@ Vue.component("mandala-generator", {
       for (let i = 0; i < amount; i++) {
         const startX = x + this.radio * Math.cos((2 * Math.PI * i) / n);
         const startY = y + this.radio * Math.sin((2 * Math.PI * i) / n);
-        const endX = x + this.radio * Math.cos((2 * Math.PI * (i + amount)) / n);
-        const endY = y + this.radio * Math.sin((2 * Math.PI * (i + amount)) / n);
+        const endX =
+          x + this.radio * Math.cos((2 * Math.PI * (i + amount)) / n);
+        const endY =
+          y + this.radio * Math.sin((2 * Math.PI * (i + amount)) / n);
         this.linesGroup.line(startX, startY, endX, endY);
       }
     },
     drawCircles(value) {
       this.circles = value;
       this.circlesGroup.clear();
-      const radialDistance = this.radio / value;
+      let radialDistance = this.radio / value;
       for (let i = 0; i < value; i++) {
-        this.addCircle(radialDistance * (i + 1));
+        let rad = radialDistance * (i + 1);
+        if (this.progressive) {
+          rad *= (i + 1) / value;
+        }
+        this.addCircle(rad);
       }
+    },
+    progressiveHandler() {
+      this.progressive = !this.progressive;
+      this.drawCircles(this.circles);
     },
     linesHandler(value) {
       console.log("linesHandler", value);
@@ -164,11 +186,13 @@ Vue.component("mandala-generator", {
   template: `<div class="container">
     <controls
       :circles="circles"
+      :progressive="progressive"
       :lines="lines"
       :strokeWidth="strokeWidth"
       :strokeDasharray="strokeDasharray"
       :color="color"
       @circlesInput="drawCircles"
+      @progressiveHandler="progressiveHandler"
       @linesInput="drawLines"
       @strokeWidthInput="strokeWidthHandler"
       @strokeDasharrayInput="strokeDasharrayHandler"
@@ -177,7 +201,7 @@ Vue.component("mandala-generator", {
     <div class="svg-container">
       <svg id="svg" ref="svg" :style=""/>
     </div>
-  </div>`
+  </div>`,
 });
 
 var vm = new Vue({
